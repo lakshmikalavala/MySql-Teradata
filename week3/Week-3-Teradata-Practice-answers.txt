@@ -1,0 +1,376 @@
+
+Exercise 1: (a) Use COUNT and DISTINCT to determine how many distinct skus there are in pairs of the
+skuinfo, skstinfo, and trnsact tables. Which skus are common to pairs of tables, or unique to specific
+tables? 
+
+Queries: 
+
+SELECT COUNT(DISTINCT s.SKU), COUNT(DISTINCT t.sku)
+FROM SKUINFO s
+LEFT JOIN TRNSACT t
+ON s.sku=t.sku
+
+Ans: 1564178 714499
+
+SELECT COUNT(DISTINCT s.SKU)
+FROM SKUINFO s
+JOIN TRNSACT t
+ON s.sku=t.sku
+
+Ans: 714499
+
+SELECT COUNT(DISTINCT s.SKU), COUNT(DISTINCT t.sku)
+FROM SKUINFO s
+LEFT JOIN TRNSACT t
+ON s.sku=t.sku
+WHERE t.sku IS NULL;
+
+Ans: 849679
+
+SELECT COUNT(DISTINCT s.SKU), COUNT(DISTINCT sk.sku)
+FROM SKUINFO s
+LEFT JOIN SKSTINFO sk
+ON s.sku=sk.sku
+
+Ans: 1564178 760212
+
+SELECT COUNT(DISTINCT s.SKU), COUNT(DISTINCT sk.sku)
+FROM SKUINFO s
+LEFT JOIN SKSTINFO sk
+ON s.sku=sk.sku
+WHERE sk.sku IS NULL
+
+Ans: 803966
+
+SELECT COUNT(DISTINCT t.sku)
+FROM TRNSACT t LEFT JOIN SKSTINFO sk
+ON t.sku=sk.sku
+WHERE sk.sku IS NULL;
+
+Ans: 171986
+
+SELECT COUNT(DISTINCT sk.sku)
+FROM TRNSACT t RIGHT JOIN SKSTINFO sk
+ON t.sku=sk.sku
+WHERE t.sku IS NULL;
+
+Ans: 217699
+
+(b) Use COUNT to determine how many instances there are of each sku associated with each store in the
+skstinfo table and the trnsact table? 
+
+Querys: 
+
+SELECT COUNT(*) AS countCombine
+FROM SKSTINFO
+GROUP BY SKU, STORE
+
+SELECT COUNT(*) AS countCombine
+FROM TRNSACT t JOIN SKSTINFO s
+ON t.sku=s.sku AND t.store=s.store
+
+SELECT t.sku AS TSKU, t.store as TSTORE, COUNT(*) AS countCombine
+FROM TRNSACT t JOIN SKSTINFO s
+ON t.sku=s.sku AND t.store=s.store
+GROUP BY t.sku, t.store;
+
+SELECT sk.sku, sk.store, COUNT(*) AS countCombine
+FROM SKSTINFO sk, TRNSACT t
+WHERE sk.sku=t.sku AND sk.store=t.store
+GROUP BY sk.sku, sk.store
+
+OR
+
+SELECT t.sku, t.store, COUNT(*) AS countCombine
+FROM SKSTINFO sk, TRNSACT t
+WHERE sk.sku=t.sku AND sk.store=t.store
+GROUP BY t.sku, t.store
+
+trying left join to find the non matching entries in transact.
+
+SELECT t.sku, t.store, COUNT(*) AS countCombine
+FROM TRNSACT t
+LEFT JOIN  SKSTINFO sk
+ON sk.sku=t.sku AND sk.store=t.store
+WHERE sk.sku IS NULL AND sk.store IS NULL
+GROUP BY t.sku, t.store;
+
+Exercise 2: (a) Use COUNT and DISTINCT to determine how many distinct stores there are in the
+strinfo, store_msa, skstinfo, and trnsact tables. 
+
+SELECT COUNT (DISTINCT store) FROM STRINFO;
+SELECT COUNT (DISTINCT store) FROM SKSTINFO;
+SELECT COUNT (DISTINCT store) FROM STORE_MSA;
+SELECT COUNT (DISTINCT store) FROM TRNSACT;
+
+(b) Which stores are common to all four tables, or unique to specific tables? 
+
+stores common
+SELECT s.store
+FROM STRINFO s
+JOIN SKSTINFO sk
+  ON s.store=sk.store
+JOIN STORE_MSA sm
+  ON s.store=sm.store
+JOIN TRNSACT t
+  ON s.store=t.store;
+
+SELECT DISTINCT s.store
+FROM STRINFO s
+JOIN SKSTINFO sk
+  ON s.store=sk.store
+JOIN STORE_MSA sm
+  ON s.store=sm.store
+JOIN TRNSACT t
+  ON s.store=t.store;  
+
+OR
+  
+SELECT s.store
+FROM STRINFO s, SKSTINFO sk, STORE_MSA sm, TRNSACT t
+WHERE s.store=sk.store AND sk.store=sm.store AND t.store=sk.store;
+ 
+(1) STRINFO and STORE_MSA
+ 
+SELECT DISTINCT store FROM STRINFO;
+SELECT DISTINCT store FROM STORE_MSA;
+
+SELECT DISTINCT s.store
+FROM STRINFO s JOIN STORE_MSA sm
+  ON s.store=sm.store;
+ 
+SELECT s.store
+FROM STRINFO s LEFT JOIN STORE_MSA sm
+  ON s.store=sm.store
+WHERE sm.store IS NULL;
+
+SELECT s.store
+FROM STRINFO s RIGHT JOIN STORE_MSA sm
+  ON s.store=sm.store
+WHERE s.store IS NULL;
+
+(2) STRINFO and SKSTINFO
+SELECT DISTINCT store FROM STRINFO;
+SELECT DISTINCT store FROM SKSTINFO;
+
+SELECT DISTINCT s.store
+ FROM STRINFO s JOIN SKSTINFO sk
+  ON s.store=sk.store;
+
+SELECT DISTINCT s.store
+ FROM STRINFO s LEFT JOIN SKSTINFO sk
+  ON s.store=sk.store
+WHERE sk.store IS NULL;
+
+SELECT DISTINCT s.store
+ FROM STRINFO s RIGHT JOIN SKSTINFO sk
+  ON s.store=sk.store
+WHERE s.store IS NULL;
+
+(3) STRINFO and TRNSACT
+SELECT DISTINCT store FROM STRINFO;
+SELECT DISTINCT store FROM TRNSACT;
+
+SELECT DISTINCT s.store
+ FROM STRINFO s JOIN TRNSACT t
+  ON s.store=t.store;
+
+SELECT DISTINCT s.store
+ FROM STRINFO s LEFT JOIN TRNSACT t
+  ON s.store=t.store
+WHERE t.store IS NULL;
+
+SELECT DISTINCT s.store
+ FROM STRINFO s RIGHT JOIN TRNSACT t
+  ON s.store=t.store
+WHERE s.store IS NULL;
+  
+(4) STORE_MSA  AND SKSTINFO
+
+SELECT DISTINCT store FROM STORE_MSA;
+SELECT DISTINCT store FROM SKSTINFO;
+
+SELECT DISTINCT sk.store
+ FROM STORE_MSA sm JOIN SKSTINFO sk
+  ON sm.store=sk.store;
+
+SELECT DISTINCT sm.store
+ FROM STORE_MSA sm JOIN SKSTINFO sk
+  ON sm.store=sk.store;
+
+SELECT DISTINCT sm.store
+ FROM STORE_MSA sm LEFT JOIN SKSTINFO sk
+  ON sm.store=sk.store
+WHERE sk.store IS NULL;
+
+SELECT DISTINCT sk.store
+ FROM STORE_MSA sm RIGHT JOIN SKSTINFO sk
+  ON sm.store=sk.store
+WHERE sm.store IS NULL;
+
+(5) TRNSACT and STORE_MSA
+SELECT DISTINCT store FROM TRNSACT;
+SELECT DISTINCT store FROM STORE_MSA;
+
+SELECT DISTINCT t.store
+ FROM STORE_MSA sm JOIN TRNSACT t
+  ON sm.store=t.store;
+
+SELECT DISTINCT sm.store
+ FROM STORE_MSA sm JOIN TRNSACT t
+  ON sm.store=t.store;
+
+SELECT DISTINCT sm.store
+ FROM STORE_MSA sm LEFT JOIN TRNSACT t
+  ON sm.store=t.store
+WHERE t.store IS NULL;
+
+SELECT DISTINCT t.store
+ FROM STORE_MSA sm RIGHT JOIN TRNSACT t
+  ON sm.store=t.store
+WHERE sm.store IS NULL;
+
+(6) TRNSACT and SKSTINFO
+
+SELECT DISTINCT store FROM TRNSACT;
+SELECT DISTINCT store FROM SKSTINFO;
+
+SELECT DISTINCT t.store
+ FROM SKSTINFO sk JOIN TRNSACT t
+  ON sk.store=t.store;
+
+SELECT DISTINCT sk.store
+ FROM SKSTINFO sk JOIN TRNSACT t
+  ON sk.store=t.store;
+
+SELECT DISTINCT sk.store
+ FROM SKSTINFO sk LEFT JOIN TRNSACT t
+  ON sk.store=t.store
+WHERE t.store IS NULL;
+
+SELECT DISTINCT t.store
+ FROM SKSTINFO sk RIGHT JOIN TRNSACT t
+  ON sk.store=t.store
+WHERE sk.store IS NULL;
+
+SELECT COUNT(DISTINCT s.store), COUNT(DISTINCT sk.store), COUNT(DISTINCT sm.store), COUNT(DISTINCT t.store)
+FROM STRINFO s
+JOIN SKSTINFO sk ON s.store=sk.store
+JOIN STORE_MSA sm ON t.store=sm.store
+JOIN TRNSACT t ON sk.store=t.store;
+
+(b)Store which are specific to STRINFO 
+SELECT DISTINCT s.store
+FROM strinfo s 
+LEFT JOIN store_msa m ON m.store=s.store 
+LEFT JOIN skstinfo k ON k.store=s.store 
+LEFT JOIN trnsact t ON t.store=s.store 
+WHERE m.store IS NULL AND k.store IS NULL AND t.store IS NULL
+ORDER BY s.store ASC;
+
+Question 4: Although we can’t complete all the analyses we’d like to on Dillard’s profit, we can look at
+general trends. What is Dillard’s average profit per day?
+Query:
+
+SELECT DISTINCT t.REGISTER, SUM(t.sprice - sk.COST)/COUNT(DISTINCT t.SALEDATE) AS AvgProfit
+FROM TRNSACT t
+JOIN SKSTINFO sk
+  ON t.SKU=sk.SKU AND t.STORE=sk.STORE
+WHERE t.STYPE='P'
+GROUP BY t.REGISTER
+ORDER BY t.REGISTER DESC;
+
+Exercise 5: On what day was the total value (in $) of returned goods the greatest? On what day was the
+total number of individual returned items the greatest?
+Query:
+
+SELECT t.SALEDATE, SUM(t.AMT)AS RETURNEDAMT
+FROM trnsact t
+WHERE t.STYPE = 'R'
+GROUP BY t.SALEDATE
+ORDER BY RETURNEDAMT DESC;
+
+SELECT t.SALEDATE, SUM(t.QUANTITY)AS RETURNEDQUANTITY
+FROM trnsact t
+WHERE t.STYPE = 'R'
+GROUP BY t.SALEDATE
+ORDER BY RETURNEDQUANTITY DESC;
+
+Exercise 6: What is the maximum price paid for an item in our database? What is the minimum price
+paid for an item in our database?
+Query:
+
+SELECT MAX(t.sprice), MIN(t.sprice)
+FROM TRNSACT t
+JOIN SKSTINFO sk
+  ON t.SKU=sk.SKU AND t.STORE=sk.STORE
+WHERE t.STYPE='P'
+
+Exercise 7: How many departments have more than 100 brands associated with them, and what are their
+descriptions?
+Query:
+
+SELECT DISTINCT s.DEPT, COUNT(s.BRAND), d.DEPTDESC
+FROM DEPTINFO d
+JOIN SKUINFO s
+  ON s.DEPT=d.DEPT
+GROUP BY s.DEPT, d.DEPTDESC
+HAVING COUNT(s.BRAND)>100;
+
+SELECT DISTINCT s.DEPT, d.DEPTDESC
+FROM DEPTINFO d
+JOIN SKUINFO s
+  ON s.DEPT=d.DEPT
+WHERE s.DEPT=6006;
+
+SELECT DISTINCT s.DEPT, d.DEPTDESC
+FROM DEPTINFO d
+JOIN SKUINFO s
+  ON s.DEPT=d.DEPT
+WHERE s.DEPT=1301;
+
+SELECT DISTINCT s.DEPT, d.DEPTDESC
+FROM DEPTINFO d
+JOIN SKUINFO s
+  ON s.DEPT=d.DEPT
+WHERE s.DEPT=9105;
+
+
+Exercise 8: Write a query that retrieves the department descriptions of each of the skus in the skstinfo table. 
+Query:
+
+SELECT DISTINCT sk.SKU, d.DEPTDESC
+FROM SKSTINFO sk
+JOIN SKUINFO s 
+  ON s.SKU=sk.SKU
+JOIN DEPTINFO d
+  ON s.DEPT=d.DEPT
+ 
+
+Exercise 9: What department (with department description), brand, style, and color had the greatest total value of returned items?    You will need to join 3 tables in this query.  Start by writing a query that connects 2 tables.  Once you are sure that query works, connect the 3rd table.  Make sure you include both of these fields in the SELECT and GROUP BY clauses.  Make sure any non-aggregate column in your SELECT list is also listed in your GROUP BY clause.    
+Query:
+
+SELECT sk.DEPT, sk.BRAND, sk.COLOR, sk.STYLE, SUM(t.AMT) AS RETURNEDAMT
+FROM SKUINFO sk
+JOIN DEPTINFO d
+  ON sk.DEPT=d.DEPT
+JOIN TRNSACT t
+  ON sk.SKU=t.SKU
+WHERE t.STYPE='R'
+GROUP BY sk.DEPT, sk.BRAND, sk.COLOR, sk.STYLE
+ORDER BY RETURNEDAMT DESC;
+
+Exercise 10: In what state and zip code is the store that had the greatest total revenue during the time period monitored in our dataset?
+You will need to join two tables to answer this question, and will need to divide your answers up according to the “state” and “zip” fields.
+Make sure you include both of these fields in the SELECT and GROUP BY clauses.
+Don’t forget to specify that you only want to examine purchase transactions (not returns).
+If you have written your query correctly, you will find that the department with the 10th highest total revenue is in Hurst, TX.
+Query:
+
+SELECT s.STATE, s.CITY, s.ZIP, SUM(t.AMT) AS REVENUE
+FROM STRINFO s
+JOIN TRNSACT t
+  ON s.STORE=t.STORE
+WHERE STYPE='P'
+GROUP BY s.STATE, s.CITY, s.ZIP
+ORDER BY 4 DESC;
